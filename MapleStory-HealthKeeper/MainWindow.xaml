@@ -1,0 +1,57 @@
+﻿<Window x:Class="MapleStory_HealthKeeper.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MapleStory_HealthKeeper"
+        mc:Ignorable="d" Loaded="Window_Loaded"
+        Title="MapleStory-HealthKeeper"  SizeToContent="WidthAndHeight">
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Setter Property="InputMethod.IsInputMethodEnabled" Value="False" />
+            <Setter Property="Margin" Value="5 0" />
+            <Setter Property="Padding" Value="5 1" />
+        </Style>
+    </Window.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <TextBlock Text="目標程式名稱：" />
+            <TextBox Text="{Binding MapleStoryProcessName}" />
+            <TextBlock Text="狀態：" />
+            <TextBlock Text="{Binding Status}" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <TextBlock Text="當HP&lt;" />
+            <TextBox Text="{Binding KeepHpOverThen}" />
+            <TextBlock Text="%時按下" />
+            <TextBox Text="{Binding HpKey,Converter={StaticResource KeyStringConverter}}" PreviewKeyDown="TextBox_PreviewKeyDown" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="2">
+            <TextBlock Text="當MP&lt;" />
+            <TextBox Text="{Binding KeepMpOverThen}" />
+            <TextBlock Text="%時按下" />
+            <TextBox Text="{Binding MpKey,Converter={StaticResource KeyStringConverter}}" PreviewKeyDown="TextBox_PreviewKeyDown" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="3">
+            <TextBlock Text="每" />
+            <TextBox Text="{Binding Delay}" />
+            <TextBlock Text="ms檢查一次" />
+        </StackPanel>
+        <Grid Grid.Row="4">
+            <TextBlock Text="For v113 or below" />
+            <TextBlock Text="{Binding Slogan}" HorizontalAlignment="Right" />
+        </Grid>
+        <TextBlock Text="Powered by flier268" HorizontalAlignment="Right" Grid.Row="5" />
+    </Grid>
+</Window>

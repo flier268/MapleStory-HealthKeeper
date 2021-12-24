@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "MapleStory-HealthKeeper": {
+      "commandName": "Project",
+      "remoteDebugEnabled": true,
+      "remoteDebugMachine": "DESKTOP-CBAS0FR"
+    }
+  }
+}

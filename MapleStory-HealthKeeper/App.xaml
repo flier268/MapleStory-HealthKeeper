@@ -1,0 +1,9 @@
+﻿<Application x:Class="MapleStory_HealthKeeper.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converter="clr-namespace:MapleStory_HealthKeeper.Converter"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <converter:KeyStringConverter x:Key="KeyStringConverter" />
+    </Application.Resources>
+</Application>
