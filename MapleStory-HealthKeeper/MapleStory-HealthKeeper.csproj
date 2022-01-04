@@ -12,6 +12,7 @@
 	<Company>flier268.dev</Company>
 	<ApplicationIcon>favicon.ico</ApplicationIcon>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
+	<Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
