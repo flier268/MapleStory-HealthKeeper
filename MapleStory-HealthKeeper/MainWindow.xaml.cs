@@ -8,15 +8,18 @@ namespace MapleStory_HealthKeeper
         {
             if (target is MainWindowViewModel mainWindowViewModel)
             {
-                if (propertyName == nameof(MainWindowViewModel.Status) || propertyName == nameof(MainWindowViewModel.Slogan))
-                    return;
-                if(mainWindowViewModel.KeepHpOverThen >100)
+                if (mainWindowViewModel.KeepHpOverThen > 100)
                     mainWindowViewModel.KeepHpOverThen = 100;
                 if (mainWindowViewModel.KeepMpOverThen > 100)
                     mainWindowViewModel.KeepMpOverThen = 100;
-                onPropertyChangedAction();
+                if (propertyName == nameof(MainWindowViewModel.Status) || propertyName == nameof(MainWindowViewModel.Slogan))
+                {
+                    onPropertyChangedAction();
+                    return;
+                }
                 SharedFunctions.SaveJsonFile(mainWindowViewModel, "MapleStory-HealthKeeper.json");
             }
+            onPropertyChangedAction();
         }
     }
 
