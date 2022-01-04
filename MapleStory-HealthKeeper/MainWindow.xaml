@@ -33,19 +33,19 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="1">
             <TextBlock Text="當HP&lt;" />
-            <TextBox Text="{Binding KeepHpOverThen}" />
+            <TextBox Text="{Binding KeepHpOverThen}" PreviewTextInput="TextBox_PreviewTextInput" />
             <TextBlock Text="%時按下" />
             <TextBox Text="{Binding HpKey,Converter={StaticResource KeyStringConverter}}" PreviewKeyDown="TextBox_PreviewKeyDown" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2">
             <TextBlock Text="當MP&lt;" />
-            <TextBox Text="{Binding KeepMpOverThen}" />
+            <TextBox Text="{Binding KeepMpOverThen}" PreviewTextInput="TextBox_PreviewTextInput" />
             <TextBlock Text="%時按下" />
             <TextBox Text="{Binding MpKey,Converter={StaticResource KeyStringConverter}}" PreviewKeyDown="TextBox_PreviewKeyDown" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3">
             <TextBlock Text="每" />
-            <TextBox Text="{Binding Delay}" />
+            <TextBox Text="{Binding Delay}" PreviewTextInput="TextBox_PreviewTextInput" />
             <TextBlock Text="ms檢查一次" />
         </StackPanel>
         <Grid Grid.Row="4">

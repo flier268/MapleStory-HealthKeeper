@@ -58,7 +58,9 @@ namespace MapleStory_HealthKeeper
         {
         }
 
-        private void TextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) => SharedFunctions.TextBox_PreviewKeyDown((TextBox)sender, ref e, ref MainWindowViewModel);
+        private void TextBox_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e) => SharedFunctions.TextBox_PreviewKeyDown((TextBox)sender, ref e);
+
+        private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) => SharedFunctions.NumberValidationTextBox(sender, ref e);
 
         private MainWindowViewModel MainWindowViewModel;
     }

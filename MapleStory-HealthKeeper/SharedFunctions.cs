@@ -26,10 +26,9 @@ namespace MapleStory_HealthKeeper
             };
         }
 
-        public static void TextBox_PreviewKeyDown<T>(TextBox sender, ref System.Windows.Input.KeyEventArgs e, ref T JobEditorViewModel)
+        public static void TextBox_PreviewKeyDown(TextBox sender, ref System.Windows.Input.KeyEventArgs e)
         {
             e.Handled = true;
-
             int? scanCode = (int?)e.GetType().GetProperty("ScanCode", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(e);
             if (scanCode is null)
                 throw new ArgumentException("This should get scancode");
@@ -48,24 +47,15 @@ namespace MapleStory_HealthKeeper
                 scanCode = 0;
                 isExtendedKey = false;
             }
-            if (JobEditorViewModel is not null)
+            BindingExpression bindingExpression = sender.GetBindingExpression(TextBox.TextProperty);
+            var p = sender.DataContext.GetType().GetProperty(bindingExpression.ResolvedSourcePropertyName);
+            FullKeyInfo fullKeyInfo = new()
             {
-                BindingExpression bindingExpression = sender.GetBindingExpression(TextBox.TextProperty);
-                var p = JobEditorViewModel.GetType().GetProperty(bindingExpression.ResolvedSourcePropertyName);
-                FullKeyInfo fullKeyInfo = new()
-                {
-                    Key = key,
-                    ScanCode = (int)scanCode,
-                    IsExtented = (bool)isExtendedKey
-                };
-
-                p?.SetValue(JobEditorViewModel, fullKeyInfo);
-            }
-            else
-            {
-                throw new Exception("JobEditorViewModel should not be null");
-            }
-            //textbox.Text = key.ToString();
+                Key = key,
+                ScanCode = (int)scanCode,
+                IsExtented = (bool)isExtendedKey
+            };
+            p?.SetValue(sender.DataContext, fullKeyInfo);
         }
 
         public static void NumberValidationTextBox(object sender, ref TextCompositionEventArgs e)
