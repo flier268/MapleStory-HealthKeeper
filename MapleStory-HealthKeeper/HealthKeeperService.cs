@@ -26,6 +26,7 @@ namespace MapleStory_HealthKeeper
         private void BackgroundWorker_DoWork(object? sender, DoWorkEventArgs e)
         {
             double Y = 585 / 600d;
+            double InGameCheckPoint = 75 / 800d;
             double HpMin = 220 / 800d;
             double HpMax = 324 / 800d;
             double MpMin = 329 / 800d;
@@ -55,6 +56,11 @@ namespace MapleStory_HealthKeeper
                         //Color mpmin = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(MpMin * Width), YPoint);
                         //Color mpmax = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(MpMax - MpMin), YPoint);
 
+                        // Check in game
+                        Color InGameCheckPointColor = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(InGameCheckPoint * Width), YPoint);
+                        if (FindPIC.IsColor(CheckPointColor, InGameCheckPointColor, 10) == false)
+                            continue;
+
                         Color HP = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(((HpMax - HpMin) * (ViewModel.KeepHpOverThen / 100d) + HpMin) * Width), YPoint);
                         Color MP = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(((MpMax - MpMin) * (ViewModel.KeepMpOverThen / 100d) + MpMin) * Width), YPoint);
                         backgroundSimulate.Hwnd = process.MainWindowHandle;
@@ -72,7 +78,8 @@ namespace MapleStory_HealthKeeper
             }
         }
 
-        private Color Gray = Color.FromArgb(190, 190, 190);
+        private readonly Color Gray = Color.FromArgb(190, 190, 190);
+        private readonly Color CheckPointColor = Color.FromArgb(17, 17, 17);
         private PreciseDelay PreciseDelay { get; } = new();
         private BackgroundWorker backgroundWorker { get; }
     }
