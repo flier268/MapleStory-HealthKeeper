@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Point = System.Drawing.Point;
-using Size = System.Drawing.Size;
 
 namespace Flier.SuperTools.Screen
 {
@@ -33,16 +33,6 @@ namespace Flier.SuperTools.Screen
             return bmp;
         }
 
-        /// <summary>
-        ///  抓取整個螢幕
-        /// </summary>
-        /// <returns></returns>
-        public static Bitmap captureScreen()
-        {
-            Size screenSize = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Size;
-            return captureScreen(0, 0, screenSize.Width, screenSize.Height);
-        }
-
         #endregion 抓取螢幕
 
         #region 使用BitBlt方法抓取控件，無論控件是否被遮擋
@@ -52,7 +42,7 @@ namespace Flier.SuperTools.Screen
         /// </summary>
         /// <param name="control">需要被截圖的控件</param>
         /// <returns>該控件的截圖，控件被遮擋時也可以正確截圖</returns>
-        public static Bitmap captureControl(Control control)
+        public static Bitmap CaptureControl(Control control)
         {
             //調用API截屏
             IntPtr hSrce = GetWindowDC(control.Handle);
@@ -115,7 +105,7 @@ namespace Flier.SuperTools.Screen
         /// </summary>
         /// <param name="form">需要被截圖的窗口</param>
         /// <returns>窗口的截圖，控件被遮擋時也可以正確截圖</returns>
-        public static Bitmap captureWindowUsingPrintWindow(Form form)
+        public static Bitmap CaptureWindowUsingPrintWindow(Form form)
         {
             return GetWindow(form.Handle);
         }
@@ -128,7 +118,7 @@ namespace Flier.SuperTools.Screen
             IntPtr hmemdc = CreateCompatibleDC(hscrdc);
             SelectObject(hmemdc, hbitmap);
             PrintWindow(hWnd, hmemdc, 0);
-            Bitmap bmp = Bitmap.FromHbitmap(hbitmap);
+            Bitmap bmp = Image.FromHbitmap(hbitmap);
             DeleteDC(hscrdc);//刪除用過的對象
             DeleteDC(hmemdc);//刪除用過的對象
             return bmp;
@@ -139,10 +129,30 @@ namespace Flier.SuperTools.Screen
             IntPtr hdc = (IntPtr)User32.GetDC(hwnd);
             int pixel = GDI32.GetPixel(hdc, x, y);
             ReleaseDC(hwnd, hdc);
-            Color color = Color.FromArgb((int)(pixel & 0x000000FF),
-                            (int)(pixel & 0x0000FF00) >> 8,
-                            (int)(pixel & 0x00FF0000) >> 16);
+            Color color = Color.FromArgb(pixel & 0x000000FF,
+                            (pixel & 0x0000FF00) >> 8,
+                            (pixel & 0x00FF0000) >> 16);
             return color;
+        }
+
+        public static Bitmap Capture(IntPtr hwnd, int width, int height)
+        {
+            IntPtr hdcSrc = (IntPtr)User32.GetDC(hwnd);
+            IntPtr hdcDest = (IntPtr)GDI32.CreateCompatibleDC(hdcSrc);
+            IntPtr hBitmap = (IntPtr)GDI32.CreateCompatibleBitmap(hdcSrc, width, height);
+            GDI32.SelectObject(hdcDest, hBitmap);
+            GDI32.BitBlt(hdcDest, 0, 0, width,
+            height, hdcSrc, 0, 0, 0x00CC0020);
+            using Bitmap image = Image.FromHbitmap(hBitmap);
+            using Bitmap originalImage = new Bitmap(image, image.Width, image.Height);
+
+            //using (Bitmap newBmp = new Bitmap(image))
+            Bitmap bmpImage = originalImage.Clone(new Rectangle(0, 0, originalImage.Width, originalImage.Height), PixelFormat.Format24bppRgb);
+
+            User32.ReleaseDC(hwnd, hdcSrc);
+            GDI32.DeleteDC(hdcDest);
+            GDI32.DeleteObject(hBitmap);
+            return bmpImage;
         }
 
         #endregion 使用PrintWindow方法抓取窗口，無論控件是否被遮擋
@@ -175,7 +185,7 @@ namespace Flier.SuperTools.Screen
         public static extern IntPtr GetWindowDC(IntPtr ptr);
 
         [DllImport("user32.dll")]
-        public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdcBlt, UInt32 nFlags);
+        public static extern bool PrintWindow(IntPtr hwnd, IntPtr hdcBlt, uint nFlags);
 
         [DllImport("user32.dll")]
         private static extern bool ReleaseDC(IntPtr hWnd, IntPtr hDc);

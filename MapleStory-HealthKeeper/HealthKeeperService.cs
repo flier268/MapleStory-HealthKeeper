@@ -49,12 +49,29 @@ namespace MapleStory_HealthKeeper
                     {
                         int Width = rect.Right - rect.Left;
                         int Height = rect.Bottom - rect.Top;
+                        //修正DPI問題
+                        var Window1607 = new Version(10, 0, 0, 9200);
+                        if (Environment.OSVersion.Version >= Window1607)
+                        {
+                            if (Process.GetCurrentProcess().MainWindowHandle != IntPtr.Zero)
+                            {
+                                int windowDPI = User32.GetDpiForWindow(process.MainWindowHandle);
+                                int thisWindowDPI = User32.GetDpiForWindow(Process.GetCurrentProcess().MainWindowHandle);
+                                Width = Width * windowDPI / thisWindowDPI;
+                                Height = Height * windowDPI / thisWindowDPI;
+                            }
+                        }
                         int YPoint = (int)(Y * Height);
                         //Debug
                         //Color hpmin = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(HpMin * Width), YPoint);
                         //Color hpmax = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(HpMax * Width), YPoint);
                         //Color mpmin = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(MpMin * Width), YPoint);
                         //Color mpmax = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(MpMax - MpMin), YPoint);
+                        //var picture = ScreenCapture.Capture(process.MainWindowHandle, Width, Height);
+                        //var g = Graphics.FromImage(picture);
+                        //g.DrawRectangle(Pens.Red, (int)(HpMin * Width), YPoint - 5, (int)(HpMax * Width) - (int)(HpMin * Width), 10);
+                        //g.DrawRectangle(Pens.Blue, (int)(MpMin * Width), YPoint - 5, (int)(MpMax * Width) - (int)(MpMin * Width), 10);
+                        //picture.Save("123.bmp");
 
                         // Check in game
                         Color InGameCheckPointColor = ScreenCapture.GetPixelColor(process.MainWindowHandle, (int)(InGameCheckPoint * Width), YPoint);
