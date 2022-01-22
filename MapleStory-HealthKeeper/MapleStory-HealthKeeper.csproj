@@ -31,8 +31,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Iced" Version="1.15.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />
+    <PackageReference Include="Reloaded.Memory.Buffers" Version="1.4.1" />
+    <PackageReference Include="Reloaded.Memory.Sigscan" Version="1.2.1" />
     <PackageReference Include="WindowsHook" Version="1.0.1" />
   </ItemGroup>
-
 </Project>
