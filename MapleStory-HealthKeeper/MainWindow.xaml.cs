@@ -12,11 +12,6 @@ namespace MapleStory_HealthKeeper
                     mainWindowViewModel.KeepHpOverThen = 100;
                 if (mainWindowViewModel.KeepMpOverThen > 100)
                     mainWindowViewModel.KeepMpOverThen = 100;
-                if (propertyName == nameof(MainWindowViewModel.Status) || propertyName == nameof(MainWindowViewModel.Slogan))
-                {
-                    onPropertyChangedAction();
-                    return;
-                }
                 SharedFunctions.SaveJsonFile(mainWindowViewModel, "MapleStory-HealthKeeper.json");
             }
             onPropertyChangedAction();
@@ -37,7 +32,7 @@ namespace MapleStory_HealthKeeper
                 mainWindowViewModel.Slogan = (double)new Random().NextDouble() switch
                 {
                     double a when a < 0.2 => "有病就要看醫生，不要亂吃藥",
-                    double a when a < 0.4 => "不用再吃藥了，已經沒要醫了",
+                    double a when a < 0.4 => "不用再吃藥了，已經沒藥醫了",
                     double a when a < 0.6 => "每天都攝取白開水2000cc哦",
                     double a when a < 0.8 => "浪費醫療資源是可恥的，住手吧！",
                     _ => "多喝水沒事，沒事多喝水",
