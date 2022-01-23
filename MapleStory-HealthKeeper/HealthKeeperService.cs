@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Iced.Intel;
 using MapleStory_HealthKeeper.Model;
@@ -13,6 +14,7 @@ namespace MapleStory_HealthKeeper
     public class HealthKeeperService
     {
         private MainWindowViewModel ViewModel { get; set; }
+        private Dictionary<IntPtr, HealthPointer> HealthPointerCache = new();
 
         public HealthKeeperService(MainWindowViewModel mainWindowViewModel)
         {
@@ -32,44 +34,47 @@ namespace MapleStory_HealthKeeper
             BackgroundSimulate backgroundSimulate = new();
             while (true)
             {
-                var ps = Process.GetProcessesByName(ViewModel.MapleStoryProcessName);
-                if (ps.Length == 0)
+                try
                 {
-                    ViewModel.Status = MainWindowViewModel.MapleStoryNotFound;
-                    PreciseDelay.Delay(3000);
-                    continue;
-                }
-                ViewModel.Status = $"Found {ps.Length} process";
-                foreach (var process in ps)
-                {
-                    var health = GetHealthPointer(process);
-                    if (health == null)
+                    var ps = Process.GetProcessesByName(ViewModel.MapleStoryProcessName);
+                    if (ps.Length == 0)
                     {
-                        WriteHook(process);
-                        health = GetHealthPointer(process);
-                    }
-                    if (health == null)
+                        ViewModel.Status = MainWindowViewModel.MapleStoryNotFound;
+                        PreciseDelay.Delay(3000);
                         continue;
-
-                    IMemory memory = new ExternalMemory(process);
-                    memory.Read(health.Value.Hp, out int HP);
-                    memory.Read(health.Value.MaxHp, out int MaxHP);
-
-                    memory.Read(health.Value.Mp, out int MP);
-                    memory.Read(health.Value.MaxMp, out int MaxMP);
-
-                    memory.Read(health.Value.Exp, out int Exp);
-                    memory.Read(health.Value.MaxExp, out int MaxExp);
-                    backgroundSimulate.Hwnd = process.MainWindowHandle;
-                    if (HP * 100d / MaxHP < ViewModel.KeepHpOverThen)
-                    {
-                        backgroundSimulate.KeyPress(ViewModel.HpKey);
                     }
-
-                    if (MP * 100d / MaxMP < ViewModel.KeepMpOverThen)
+                    ViewModel.Status = $"Found {ps.Length} process";
+                    foreach (var process in ps)
                     {
-                        backgroundSimulate.KeyPress(ViewModel.MpKey);
+                        HealthPointer? health = TryGetHealthPointer(process);
+                        if (health == null)
+                            continue;
+
+                        IMemory memory = new ExternalMemory(process);
+                        memory.Read(health.Value.Hp, out int HP);
+                        memory.Read(health.Value.MaxHp, out int MaxHP);
+
+                        memory.Read(health.Value.Mp, out int MP);
+                        memory.Read(health.Value.MaxMp, out int MaxMP);
+
+                        //memory.Read(health.Value.Exp, out int Exp);
+                        //memory.Read(health.Value.MaxExp, out int MaxExp);
+                        if (HP == 0)
+                            continue;
+                        backgroundSimulate.Hwnd = process.MainWindowHandle;
+                        if (HP * 100d / MaxHP < ViewModel.KeepHpOverThen)
+                        {
+                            backgroundSimulate.KeyPress(ViewModel.HpKey);
+                        }
+
+                        if (MP * 100d / MaxMP < ViewModel.KeepMpOverThen)
+                        {
+                            backgroundSimulate.KeyPress(ViewModel.MpKey);
+                        }
                     }
+                }
+                catch
+                {
                 }
                 PreciseDelay.Delay(ViewModel.Delay);
             }
@@ -78,9 +83,36 @@ namespace MapleStory_HealthKeeper
         private PreciseDelay PreciseDelay { get; } = new();
         private BackgroundWorker backgroundWorker { get; }
 
+        internal HealthPointer? TryGetHealthPointer(Process process)
+        {
+            if (HealthPointerCache.ContainsKey(process.MainWindowHandle))
+            {
+                return HealthPointerCache[process.MainWindowHandle];
+            }
+            else
+            {
+                if (GetHealthPointer(process, out HealthPointer? health))
+                {
+                    HealthPointerCache[process.MainWindowHandle] = (HealthPointer)health;
+                }
+                else
+                {
+                    PreciseDelay.Delay(5000);
+                    if (HealthPointerCache.Count > 10)
+                        HealthPointerCache.Clear();
+                    if (WriteHook(process))
+                    {
+                        if (GetHealthPointer(process, out health))
+                            HealthPointerCache[process.MainWindowHandle] = (HealthPointer)health;
+                    }
+                }
+                return health;
+            }
+        }
+
         internal bool WriteHook(Process process)
         {
-            if (process.MainModule == null)
+            if (process.HasExited || process.MainModule == null)
                 return false;
             IMemory memory = new ExternalMemory(process);
             Reloaded.Memory.Sigscan.Scanner scanner = new Reloaded.Memory.Sigscan.Scanner(process, process.MainModule);
@@ -165,10 +197,11 @@ namespace MapleStory_HealthKeeper
             return true;
         }
 
-        internal HealthPointer? GetHealthPointer(Process process)
+        internal bool GetHealthPointer(Process process, [NotNullWhen(true)] out HealthPointer? healthPointer)
         {
-            if (process.MainModule == null)
-                return null;
+            healthPointer = null;
+            if (process.HasExited || process.MainModule == null)
+                return false;
             IMemory memory = new ExternalMemory(process);
 
             var memoryBufferHelper = new MemoryBufferHelper(process);
@@ -177,14 +210,15 @@ namespace MapleStory_HealthKeeper
             {
                 try
                 {
-                    memory.Read(buffer.Properties.DataPointer, out HealthPointer healthPointer);
-                    return healthPointer;
+                    memory.Read(buffer.Properties.DataPointer, out HealthPointer pointer);
+                    healthPointer = pointer;
+                    return true;
                 }
                 catch (Exception)
                 {
                 }
             }
-            return null;
+            return false;
         }
     }
 }
