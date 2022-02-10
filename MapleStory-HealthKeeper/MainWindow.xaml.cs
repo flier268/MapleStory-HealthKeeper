@@ -1,23 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Linq;
+using System.Windows.Controls;
+using MapleStory_HealthKeeper.ViewModels;
 
 namespace MapleStory_HealthKeeper
 {
-    public static class PropertyChangedNotificationInterceptor
-    {
-        public static void Intercept(object target, Action onPropertyChangedAction, string propertyName)
-        {
-            if (target is MainWindowViewModel mainWindowViewModel)
-            {
-                if (mainWindowViewModel.KeepHpOverThen > 100)
-                    mainWindowViewModel.KeepHpOverThen = 100;
-                if (mainWindowViewModel.KeepMpOverThen > 100)
-                    mainWindowViewModel.KeepMpOverThen = 100;
-                SharedFunctions.SaveJsonFile(mainWindowViewModel, "MapleStory-HealthKeeper.json");
-            }
-            onPropertyChangedAction();
-        }
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -26,6 +12,7 @@ namespace MapleStory_HealthKeeper
         public MainWindow()
         {
             InitializeComponent();
+            SharedFunctions.InitJsonSerializerOptions();
             SharedFunctions.LoadJsonFile("MapleStory-HealthKeeper.json", out MainWindowViewModel? mainWindowViewModel);
             if (mainWindowViewModel is not null)
             {
@@ -58,5 +45,10 @@ namespace MapleStory_HealthKeeper
         private void TextBox_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e) => SharedFunctions.NumberValidationTextBox(sender, ref e);
 
         private MainWindowViewModel MainWindowViewModel;
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SharedFunctions.SaveJsonFile(DataContext, "MapleStory-HealthKeeper.json");
+        }
     }
 }

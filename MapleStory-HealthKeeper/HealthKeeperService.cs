@@ -62,14 +62,61 @@ namespace MapleStory_HealthKeeper
                         if (HP == 0)
                             continue;
                         backgroundSimulate.Hwnd = process.MainWindowHandle;
-                        if (HP * 100d / MaxHP < ViewModel.KeepHpOverThen)
+
+                        for (int i = 0; i < ViewModel.HpHealProfiles.Count; i++)
                         {
-                            backgroundSimulate.KeyPress(ViewModel.HpKey);
+                            bool @break = false;
+                            switch (ViewModel.HpHealProfiles[i].HealMode)
+                            {
+                                case Helper.HealMode.Percentage:
+                                    if (HP * 100d / MaxHP < ViewModel.HpHealProfiles[i].KeepOverThen)
+                                    {
+                                        backgroundSimulate.KeyPress(ViewModel.HpHealProfiles[i].Key);
+                                        @break = true;
+                                    }
+                                    break;
+
+                                case Helper.HealMode.ExactValue:
+                                    if (HP < ViewModel.HpHealProfiles[i].KeepOverThen)
+                                    {
+                                        backgroundSimulate.KeyPress(ViewModel.HpHealProfiles[i].Key);
+                                        @break = true;
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            if (@break)
+                                break;
                         }
 
-                        if (MP * 100d / MaxMP < ViewModel.KeepMpOverThen)
+                        for (int i = 0; i < ViewModel.MpHealProfiles.Count; i++)
                         {
-                            backgroundSimulate.KeyPress(ViewModel.MpKey);
+                            bool @break = false;
+                            switch (ViewModel.MpHealProfiles[i].HealMode)
+                            {
+                                case Helper.HealMode.Percentage:
+                                    if (MP * 100d / MaxMP < ViewModel.MpHealProfiles[i].KeepOverThen)
+                                    {
+                                        backgroundSimulate.KeyPress(ViewModel.MpHealProfiles[i].Key);
+                                        @break = true;
+                                    }
+                                    break;
+
+                                case Helper.HealMode.ExactValue:
+                                    if (MP < ViewModel.MpHealProfiles[i].KeepOverThen)
+                                    {
+                                        backgroundSimulate.KeyPress(ViewModel.MpHealProfiles[i].Key);
+                                        @break = true;
+                                    }
+                                    break;
+
+                                default:
+                                    break;
+                            }
+                            if (@break)
+                                break;
                         }
                     }
                 }
